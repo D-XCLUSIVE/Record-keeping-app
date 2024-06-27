@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem
+from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton
 
 from PyQt6.QtCore import Qt 
 from PyQt6.QtGui import QAction
@@ -29,18 +29,13 @@ class MainWindow(QMainWindow):
         Services.triggered.connect(self.show_services)
         Staff.triggered.connect(self.show_staff)
         Transactions.triggered.connect(self.show_Transaction)
-        Products.triggered.connect()
+        Products.triggered.connect(self.show_products)
+        
+
 
         
 
-        self.table = QTableWidget()
-        self.table.setColumnCount(7)
-
-        
-        self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
-
-        self.setCentralWidget(self.table)
-
+       
         
 
         toolbar = QToolBar()
@@ -49,11 +44,23 @@ class MainWindow(QMainWindow):
 
         add_products_action = QAction("Add Products", self)
         search_products_action = QAction("Search Products", self)
-       
 
+        add_products_action.triggered.connect(self.add_prodocut)
+
+        self.show_products()
+        
         toolbar.addAction(add_products_action)
         toolbar.addAction(search_products_action)
-       
+    
+
+    def show_products(self):
+        self.table = QTableWidget()
+        self.table.setColumnCount(7)
+        self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
+
+        self.setCentralWidget(self.table)
+        
+
 
     def load_data(self):
         connection = sqlite3.connect("database.db")
@@ -66,7 +73,9 @@ class MainWindow(QMainWindow):
         connection.close()
        
 
-
+    def add_prodocut(self):
+        dialog = AddProducts()
+        dialog.exec()
        
 
     def show_services(self):
@@ -90,7 +99,63 @@ class MainWindow(QMainWindow):
         self.Transaction_table.setHorizontalHeaderLabels(("TransactionID", "Type", "Date", "ProductID/ServiceID", "Quantity/Duration", "Price", "TotalAmount", "PaymentMethod", "StaffID",))
         
         self.setCentralWidget(self.Transaction_table)
-  
+
+class AddProducts(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Add Products")
+        self.setFixedWidth(300)
+        self.setFixedHeight(300)
+
+        layout = QVBoxLayout()
+
+        self.pro_Name = QLineEdit()
+        self.pro_Name.setPlaceholderText("Product_Name")
+        layout.addWidget(self.pro_Name)
+
+        self.pro_Cat = QLineEdit()
+        self.pro_Cat.setPlaceholderText("Product_Category")
+        layout.addWidget(self.pro_Cat)
+
+        self.pro_Sp = QLineEdit()
+        self.pro_Sp.setPlaceholderText("Selling Price")
+        layout.addWidget(self.pro_Sp)
+
+        self.pro_Cp = QLineEdit()
+        self.pro_Cp.setPlaceholderText("Cost Price")
+        layout.addWidget(self.pro_Cp)
+
+        self.pro_Quantity = QLineEdit()
+        self.pro_Quantity.setPlaceholderText("Quantity")
+        layout.addWidget(self.pro_Quantity)
+
+        self.pro_Dec = QLineEdit()
+        self.pro_Dec.setPlaceholderText("Description")
+        layout.addWidget(self.pro_Dec)
+
+        button = QPushButton("Add")
+        button.clicked.connect(self.insert_product)
+        
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+
+    def insert_product(self):
+        name = self.pro_Name.text()
+        category = self.pro_Cat.text()
+        selling_price = self.pro_Sp.text()
+        cost_price = self.pro_Cp.text()
+        quantity = self.pro_Quantity.text()
+        description = self.pro_Dec.text()
+
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO products (NAME, CATEGORY, SELLING_PRICE, COST_PRICE, QUANTITY, DESCRIPTION) VALUES (?, ?, ?, ?, ?, ?)", (name, category, selling_price, cost_price, quantity, description))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_data()
 
 
 
