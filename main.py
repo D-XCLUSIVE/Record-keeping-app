@@ -1,8 +1,8 @@
-from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog
+from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem
 
 from PyQt6.QtCore import Qt 
 from PyQt6.QtGui import QAction
-
+import sqlite3
 import sys 
 
 class MainWindow(QMainWindow):
@@ -18,14 +18,18 @@ class MainWindow(QMainWindow):
         Services = QAction("Services", self)
         Staff = QAction("Staff", self)
         Transactions = QAction("Transaction", self)
-
+        Products = QAction("Products", self )
+        
+        table_menu_item.addAction(Products)
         table_menu_item.addAction(Staff)
         table_menu_item.addAction(Services)
         table_menu_item.addAction(Transactions)
+       
 
         Services.triggered.connect(self.show_services)
         Staff.triggered.connect(self.show_staff)
         Transactions.triggered.connect(self.show_Transaction)
+        Products.triggered.connect()
 
         
 
@@ -33,7 +37,7 @@ class MainWindow(QMainWindow):
         self.table.setColumnCount(7)
 
         
-        self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING PRICE", "COST PRICE", "QUANTITY", "DESCRIPTION"))
+        self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
 
         self.setCentralWidget(self.table)
 
@@ -50,6 +54,18 @@ class MainWindow(QMainWindow):
         toolbar.addAction(add_products_action)
         toolbar.addAction(search_products_action)
        
+
+    def load_data(self):
+        connection = sqlite3.connect("database.db")
+        result = connection.execute("SELECT * FROM products")
+        self.table.setRowCount(0)
+        for row_number, row_data in enumerate(result):
+            self.table.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        connection.close()
+       
+
 
        
 
@@ -82,4 +98,5 @@ app = QApplication(sys.argv)
 
 main_window = MainWindow()
 main_window.show()
+main_window.load_data()
 sys.exit(app.exec())
