@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton, QMessageBox, QComboBox, QStatusBar
+from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton, QMessageBox, QComboBox, QStatusBar, QHBoxLayout
 
 from PyQt6.QtCore import Qt 
 from PyQt6.QtGui import QAction
@@ -43,14 +43,33 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
 
         add_products_action = QAction("Add Products", self)
-        search_products_action = QAction("Search Products", self)
+        toolbar.addAction(add_products_action)
+           
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search for a product...")
+        self.search_input.setMinimumWidth(400)
+        search_button = QPushButton("Search")
+        search_button.clicked.connect(self.search_product)
+        search_button.setMinimumWidth(100)
+        search_widget = QWidget()
+        search_layout = QHBoxLayout(search_widget)
+
+        search_layout.addWidget(self.search_input)
+        search_layout.addWidget(search_button)
+        
+        toolbar.addWidget(search_widget)
+
+        self.statusbar = QStatusBar()
+        self.setStatusBar(self.statusbar)
 
         add_products_action.triggered.connect(self.add_prodocut)
 
+        #---------------------------
+
         self.show_products()
         
-        toolbar.addAction(add_products_action)
-        toolbar.addAction(search_products_action)
+       
+        
 
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
@@ -129,7 +148,25 @@ class MainWindow(QMainWindow):
         dialog = DeleteDialog()
         dialog.exec()
 
+    def search_product(self):
+        search_text = self.search_input.text()
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        # cursor.execute("SELECT * FROM products WHERE NAME LIKE ? OR SELLING PRICE LIKE ?", ('%' + search_text + '%',), ('%'+ search_text +'%'))
+        query = "SELECT * FROM products WHERE NAME LIKE ? OR SELLING_PRICE LIKE ?"
+        params = ('%' + search_text + '%', '%' + search_text + '%')
+        result = connection.execute(query, params)
+        records = result.fetchall()
+        self.table.setRowCount(0)
+        for row_number, row_data in enumerate(records):
+            self.table.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        cursor.close()
+        connection.close()
 
+
+    
 class DeleteDialog(QDialog):
     def __init__(self):
         super().__init__()
