@@ -42,19 +42,19 @@ class MainWindow(QMainWindow):
         toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
-        add_products_action = QAction("Add Products", self)
-        toolbar.addAction(add_products_action)
+        self.add_products_action = QAction("Add Products", self)
+        toolbar.addAction(self.add_products_action)
            
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Search for a product...")
-        self.search_input.setMinimumWidth(400)
+        self.Pro_search_input = QLineEdit()
+        self.Pro_search_input.setPlaceholderText("Search for a product...")
+        self.Pro_search_input.setMinimumWidth(400)
         search_button = QPushButton("Search")
         search_button.clicked.connect(self.search_product)
         search_button.setMinimumWidth(100)
         search_widget = QWidget()
         search_layout = QHBoxLayout(search_widget)
 
-        search_layout.addWidget(self.search_input)
+        search_layout.addWidget(self.Pro_search_input)
         search_layout.addWidget(search_button)
         
         toolbar.addWidget(search_widget)
@@ -62,27 +62,23 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
 
-        add_products_action.triggered.connect(self.add_prodocut)
-
-        #---------------------------
+        self.add_products_action.triggered.connect(self.show_products)
 
         self.show_products()
-        
-       
-        
+        self.table.verticalHeader().setVisible(False)
 
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
 
         self.table.cellClicked.connect(self.cell_clicked)
     
-
     def show_products(self):
+        self.add_products_action.setVisible(True)
         self.table = QTableWidget()
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
-
         self.setCentralWidget(self.table)
+        self.load_data()
         
 
     def cell_clicked(self):
@@ -119,6 +115,7 @@ class MainWindow(QMainWindow):
        
 
     def show_services(self):
+        self.add_products_action.setVisible(False)
         self.service_table = QTableWidget()
         self.service_table.setColumnCount(7)
         self.service_table.setHorizontalHeaderLabels(("ServiceID", "Name", "Description", "Category", "Duration", "Price", "StaffIDs"))
@@ -127,6 +124,7 @@ class MainWindow(QMainWindow):
 
 
     def show_staff(self):
+        self.add_products_action.setVisible(False)
         self.staff_table = QTableWidget()
         self.staff_table.setColumnCount(6)
         self.staff_table.setHorizontalHeaderLabels(("StaffID", "Name", "Role", "ContactInfo", "Shedule", "Skill"))
@@ -134,6 +132,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.staff_table)
 
     def show_Transaction(self):
+        self.add_products_action.setVisible(False)
         self.Transaction_table = QTableWidget()
         self.Transaction_table.setColumnCount(9)
         self.Transaction_table.setHorizontalHeaderLabels(("TransactionID", "Type", "Date", "ProductID/ServiceID", "Quantity/Duration", "Price", "TotalAmount", "PaymentMethod", "StaffID",))
@@ -149,7 +148,7 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def search_product(self):
-        search_text = self.search_input.text()
+        search_text = self.Pro_search_input.text()
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         # cursor.execute("SELECT * FROM products WHERE NAME LIKE ? OR SELLING PRICE LIKE ?", ('%' + search_text + '%',), ('%'+ search_text +'%'))
