@@ -21,8 +21,8 @@ class MainWindow(QMainWindow):
         Products = QAction("Products", self )
         
         table_menu_item.addAction(Products)
-        table_menu_item.addAction(Staff)
         table_menu_item.addAction(Services)
+        table_menu_item.addAction(Staff)
         table_menu_item.addAction(Transactions)
        
 
@@ -32,19 +32,45 @@ class MainWindow(QMainWindow):
         Products.triggered.connect(self.show_products)
         
 
-
-        
-
-       
-        
-
         toolbar = QToolBar()
         toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
         self.add_products_action = QAction("Add Products", self)
+        self.add_service_action = QAction("Add Services", self)
         toolbar.addAction(self.add_products_action)
+        toolbar.addAction(self.add_service_action)
            
+        
+        self.pro_search_bar()
+        self.show_products()
+        
+        
+
+        self.add_products_action.triggered.connect(self.add_product)
+        self.add_service_action.triggered.connect(self.add_service)
+
+        self.statusbar = QStatusBar()
+        self.setStatusBar(self.statusbar)
+
+        self.table.cellClicked.connect(self.cell_clicked)
+    
+    def show_products(self):
+        self.add_products_action.setVisible(True)
+        self.add_service_action.setVisible(False)
+        self.table = QTableWidget()
+        self.table.verticalHeader().setVisible(False)
+        self.table.setColumnCount(7)
+        self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
+        self.setCentralWidget(self.table)
+        self.load_data()
+
+    
+    def pro_search_bar(self):
+        toolbar = QToolBar()
+        toolbar.setMovable(False)
+        self.addToolBar(toolbar)
+
         self.Pro_search_input = QLineEdit()
         self.Pro_search_input.setPlaceholderText("Search for a product...")
         self.Pro_search_input.setMinimumWidth(400)
@@ -62,23 +88,7 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
 
-        self.add_products_action.triggered.connect(self.show_products)
-
-        self.show_products()
-        self.table.verticalHeader().setVisible(False)
-
-        self.statusbar = QStatusBar()
-        self.setStatusBar(self.statusbar)
-
-        self.table.cellClicked.connect(self.cell_clicked)
-    
-    def show_products(self):
-        self.add_products_action.setVisible(True)
-        self.table = QTableWidget()
-        self.table.setColumnCount(7)
-        self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
-        self.setCentralWidget(self.table)
-        self.load_data()
+        
         
 
     def cell_clicked(self):
@@ -107,22 +117,36 @@ class MainWindow(QMainWindow):
             for column_number, data in enumerate(row_data):
                 self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
+
+    def load_service_data(self):
+        connection = sqlite3.connect("database.db")
+        result = connection.execute("SELECT * FROM services")
+        self.service_table.setRowCount(0)
+        for row_number, row_data in enumerate(result):
+            self.service_table.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.service_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        connection.close()
        
 
-    def add_prodocut(self):
-        dialog = AddProducts()
-        dialog.exec()
+   
        
 
     def show_services(self):
+        self.statusbar.setVisible(False)
         self.add_products_action.setVisible(False)
+        self.add_service_action.setVisible(True)
         self.service_table = QTableWidget()
-        self.service_table.setColumnCount(7)
-        self.service_table.setHorizontalHeaderLabels(("ServiceID", "Name", "Description", "Category", "Duration", "Price", "StaffIDs"))
-        
+        self.service_table.verticalHeader().setVisible(False)
+        self.service_table.setColumnCount(3)
+        self.service_table.setHorizontalHeaderLabels(("ServiceID", "Name", "Price"))
         self.setCentralWidget(self.service_table)
+        self.load_service_data()
+        
 
-
+        self.service_table.cellClicked.connect(self.cell_clicked)
+        
+        
     def show_staff(self):
         self.add_products_action.setVisible(False)
         self.staff_table = QTableWidget()
@@ -147,11 +171,18 @@ class MainWindow(QMainWindow):
         dialog = DeleteDialog()
         dialog.exec()
 
+    def add_product(self):
+        dialog = AddProducts()
+        dialog.exec()
+  
+    def add_service(self):
+        dialog = AddServices()
+        dialog.exec()
+
     def search_product(self):
         search_text = self.Pro_search_input.text()
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        # cursor.execute("SELECT * FROM products WHERE NAME LIKE ? OR SELLING PRICE LIKE ?", ('%' + search_text + '%',), ('%'+ search_text +'%'))
         query = "SELECT * FROM products WHERE NAME LIKE ? OR SELLING_PRICE LIKE ?"
         params = ('%' + search_text + '%', '%' + search_text + '%')
         result = connection.execute(query, params)
@@ -162,10 +193,7 @@ class MainWindow(QMainWindow):
             for column_number, data in enumerate(row_data):
                 self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         cursor.close()
-        connection.close()
-
-
-    
+        connection.close() 
 class DeleteDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -218,8 +246,6 @@ class DeleteDialog(QDialog):
         confirmation_widget.setWindowTitle("Sucess")
         confirmation_widget.setText("The record was deleted successfully!")
         confirmation_widget.exec()
-
-
 class EditDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -282,10 +308,6 @@ class EditDialog(QDialog):
         cursor.close()
         connection.close()
         main_window.load_data()
-
-
-
-
 class AddProducts(QDialog):
     def __init__(self):
         super().__init__()
@@ -322,7 +344,6 @@ class AddProducts(QDialog):
 
         button = QPushButton("Add")
         button.clicked.connect(self.insert_product)
-        
         layout.addWidget(button)
 
         self.setLayout(layout)
@@ -348,7 +369,46 @@ class AddProducts(QDialog):
         connection.close()
         main_window.load_data()
 
+class AddServices(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Add Services")
+        self.setFixedWidth(300)
+        self.setFixedHeight(300)
 
+        layout = QVBoxLayout()
+
+        self.Service_Name = QLineEdit()
+        self.Service_Name.setPlaceholderText("Service Name")
+        layout.addWidget(self.Service_Name)
+
+        self.Service_Price = QLineEdit()
+        self.Service_Price.setPlaceholderText("Price")
+        layout.addWidget(self.Service_Price)
+
+        button = QPushButton("Add")
+        button.clicked.connect(self.insert_service)
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+
+    def insert_service(self):
+        name = self.Service_Name.text()
+        price = self.Service_Price.text()
+
+        if not name or not price:
+            QMessageBox.warning(self, "Input Error", "All fields must be filled.")
+            return
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO services (NAME, PRICE) VALUES (?, ?)", (name, price))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_service_data()
+        
 
 app = QApplication(sys.argv)
 
