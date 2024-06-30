@@ -53,7 +53,7 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
 
-        self.table.cellClicked.connect(self.cell_clicked)
+        self.table.cellClicked.connect(self.cell_clicked_pro)
     
     def show_products(self):
         self.add_products_action.setVisible(True)
@@ -64,6 +64,8 @@ class MainWindow(QMainWindow):
         self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
         self.setCentralWidget(self.table)
         self.load_data()
+
+        self.table.cellClicked.connect(self.cell_clicked_pro)
 
     
     def pro_search_bar(self):
@@ -91,12 +93,29 @@ class MainWindow(QMainWindow):
         
         
 
-    def cell_clicked(self):
+    def cell_clicked_pro(self):
         edit_button = QPushButton("Edith Record")
         edit_button.clicked.connect(self.edit)
 
         delete_button = QPushButton("Delete Record")
-        delete_button.clicked.connect(self.delete)
+        delete_button.clicked.connect(self.delete_pro)
+
+
+        children = self.findChildren(QPushButton)
+        if children:
+            for child in children:
+                self.statusbar.removeWidget(child)
+
+        self.statusbar.addWidget(edit_button)
+        self.statusbar.addWidget(delete_button)
+
+
+    def cell_clicked_service(self):
+        edit_button = QPushButton("Edith Service")
+        edit_button.clicked.connect(self.edit)
+
+        delete_button = QPushButton("Delete Service")
+        delete_button.clicked.connect(self.delete_service)
 
 
         children = self.findChildren(QPushButton)
@@ -127,13 +146,12 @@ class MainWindow(QMainWindow):
             for column_number, data in enumerate(row_data):
                 self.service_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
-       
 
-   
-       
+
+
 
     def show_services(self):
-        self.statusbar.setVisible(False)
+        self.statusbar.setVisible(True)
         self.add_products_action.setVisible(False)
         self.add_service_action.setVisible(True)
         self.service_table = QTableWidget()
@@ -142,9 +160,7 @@ class MainWindow(QMainWindow):
         self.service_table.setHorizontalHeaderLabels(("ServiceID", "Name", "Price"))
         self.setCentralWidget(self.service_table)
         self.load_service_data()
-        
-
-        self.service_table.cellClicked.connect(self.cell_clicked)
+        self.service_table.cellClicked.connect(self.cell_clicked_service)
         
         
     def show_staff(self):
@@ -167,8 +183,12 @@ class MainWindow(QMainWindow):
         dialog = EditDialog()
         dialog.exec()
 
-    def delete(self):
+    def delete_pro(self):
         dialog = DeleteDialog()
+        dialog.exec()
+    
+    def delete_service(self):
+        dialog = DeleteService()
         dialog.exec()
 
     def add_product(self):
@@ -194,6 +214,54 @@ class MainWindow(QMainWindow):
                 self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         cursor.close()
         connection.close() 
+
+class DeleteService(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Delete Services")
+        self.setFixedWidth(200)
+        self.setFixedHeight(150)
+
+        layout = QGridLayout()
+        confirmation = QLabel(f"Are you sure you want to delete Service")
+        yes = QPushButton("Yes")
+        no = QPushButton("No")
+
+        layout.addWidget(confirmation, 0, 0, 1, 2)
+        layout.addWidget(yes, 1, 0)
+        layout.addWidget(no, 1, 0)
+
+        self.setLayout(layout)
+
+        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(20)
+
+       
+        yes.clicked.connect(self.delete_service)
+        no.clicked.connect(self.reject)
+        layout.addWidget(yes)
+        self.setLayout(layout)
+
+    def delete_service(self):
+        index = main_window.service_table.currentRow()
+        service_id = main_window.service_table.item(index, 0).text()
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM services WHERE SERVICE_ID = ?", (service_id))
+
+        connection.commit()
+        cursor.close
+        connection.close()
+
+        # Refresh the table
+        main_window.load_service_data()
+
+        self.close()
+
+        confirmation_widget = QMessageBox()
+        confirmation_widget.setWindowTitle("Sucess")
+        confirmation_widget.setText("The record was deleted successfully!")
+        confirmation_widget.exec()
 class DeleteDialog(QDialog):
     def __init__(self):
         super().__init__()
