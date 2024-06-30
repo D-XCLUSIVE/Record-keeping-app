@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
 
     def cell_clicked_service(self):
         edit_button = QPushButton("Edith Service")
-        edit_button.clicked.connect(self.edit)
+        edit_button.clicked.connect(self.edit_service)
 
         delete_button = QPushButton("Delete Service")
         delete_button.clicked.connect(self.delete_service)
@@ -182,6 +182,11 @@ class MainWindow(QMainWindow):
     def edit(self):
         dialog = EditDialog()
         dialog.exec()
+
+    def edit_service(self):
+        dialog = EdithService()
+        dialog.exec()
+
 
     def delete_pro(self):
         dialog = DeleteDialog()
@@ -376,6 +381,46 @@ class EditDialog(QDialog):
         cursor.close()
         connection.close()
         main_window.load_data()
+
+class EdithService(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Update Service Data")
+        self.setFixedWidth(300)
+        self.setFixedWidth(300)
+
+        layout = QVBoxLayout()
+
+        index = main_window.service_table.currentRow()
+        self.service_id = main_window.service_table.item(index, 0).text()
+        service_Name = main_window.service_table.item(index, 1).text()
+
+        self.service_Name = QLineEdit(service_Name)
+        self.service_Name.setPlaceholderText("Service Name")
+        layout.addWidget(self.service_Name)
+
+        service_Price = main_window.service_table.item(index, 2).text()
+        self.service_Price = QLineEdit(service_Price)
+        self.service_Price.setPlaceholderText("Price")
+        layout.addWidget(self.service_Price)
+
+        button = QPushButton("Update")
+        button.clicked.connect(self.update_service)
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+    
+    def update_service(self):
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("update services SET NAME = ?, PRICE = ?  WHERE SERVICE_ID = ?", (self.service_Name.text(), self.service_Price.text(), self.service_id))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_service_data()
+        self.close()
+
 class AddProducts(QDialog):
     def __init__(self):
         super().__init__()
