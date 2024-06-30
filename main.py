@@ -42,8 +42,10 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.add_service_action)
            
         
-        self.pro_search_bar()
+        self.service_search_bar = self.service_search_bar()
+        self.pro_search_bar = self.pro_search_bar()
         self.show_products()
+        
         
         
 
@@ -58,6 +60,8 @@ class MainWindow(QMainWindow):
     def show_products(self):
         self.add_products_action.setVisible(True)
         self.add_service_action.setVisible(False)
+        self.pro_search_bar.setVisible(True)
+        self.service_search_bar.setVisible(False)
         self.table = QTableWidget()
         self.table.verticalHeader().setVisible(False)
         self.table.setColumnCount(7)
@@ -87,10 +91,53 @@ class MainWindow(QMainWindow):
         
         toolbar.addWidget(search_widget)
 
+
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
 
+        return toolbar
+
+
+    def service_search_bar(self):
+        toolbar = QToolBar()
+        toolbar.setMovable(False)
+        self.addToolBar(toolbar)
+
+        self.Service_search_input = QLineEdit()
+        self.Service_search_input.setPlaceholderText("Search for a services...")
+        self.Service_search_input.setMinimumWidth(400)
+        search_button = QPushButton("Search_Services")
+        search_button.clicked.connect(self.search_service)
+        search_button.setMinimumWidth(100)
+        search_widget = QWidget()
+        search_layout = QHBoxLayout(search_widget)
+
+        search_layout.addWidget(self.Service_search_input)
+        search_layout.addWidget(search_button)
         
+        toolbar.addWidget(search_widget)
+
+        self.statusbar = QStatusBar()
+        self.setStatusBar(self.statusbar)
+
+        return toolbar
+    
+    def search_service(self):
+        search_text = self.Service_search_input.text()
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        query = "SELECT * FROM services WHERE NAME LIKE ? OR PRICE LIKE ?"
+        params = ('%' + search_text + '%', '%' + search_text + '%')
+        result = connection.execute(query, params)
+        records = result.fetchall()
+        self.service_table.setRowCount(0)
+        for row_number, row_data in enumerate(records):
+            self.service_table.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.service_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        cursor.close()
+        connection.close()
+
         
 
     def cell_clicked_pro(self):
@@ -154,6 +201,8 @@ class MainWindow(QMainWindow):
         self.statusbar.setVisible(True)
         self.add_products_action.setVisible(False)
         self.add_service_action.setVisible(True)
+        self.service_search_bar.setVisible(True)
+        self.pro_search_bar.setVisible(False)
         self.service_table = QTableWidget()
         self.service_table.verticalHeader().setVisible(False)
         self.service_table.setColumnCount(3)
@@ -161,8 +210,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.service_table)
         self.load_service_data()
         self.service_table.cellClicked.connect(self.cell_clicked_service)
-        
-        
+             
     def show_staff(self):
         self.add_products_action.setVisible(False)
         self.staff_table = QTableWidget()
@@ -252,7 +300,7 @@ class DeleteService(QDialog):
         service_id = main_window.service_table.item(index, 0).text()
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM services WHERE SERVICE_ID = ?", (service_id))
+        cursor.execute("DELETE FROM services WHERE SERVICE_ID = ?", (service_id,))
 
         connection.commit()
         cursor.close
@@ -275,7 +323,7 @@ class DeleteDialog(QDialog):
         self.setFixedHeight(150)
 
         layout = QGridLayout()
-        confirmation =QLabel("Are you sure you want to delete product ?")
+        confirmation =QLabel("Are you sure you want to delete products ?")
         yes = QPushButton("Yes")
         no = QPushButton("No")
 
@@ -304,7 +352,7 @@ class DeleteDialog(QDialog):
         pro_id = main_window.table.item(index, 0).text()
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM products WHERE PRODUCT_ID = ?", (pro_id))
+        cursor.execute("DELETE FROM products WHERE PRODUCT_ID = ?", (pro_id,))
 
         connection.commit()
         cursor.close
