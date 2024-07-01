@@ -4,6 +4,14 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
 import sqlite3
 import sys 
+class DatabaseConnection:
+    def __init__(self, database_file="database.db"):
+        self.database_file = database_file
+    
+    def connect(self):
+        connections = sqlite3.connect(self.database_file)
+        return connections
+
 
 class MainWindow(QMainWindow):
 
@@ -123,7 +131,7 @@ class MainWindow(QMainWindow):
     
     def search_service(self):
         search_text = self.Service_search_input.text()
-        connection = sqlite3.connect("database.db")
+        connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         query = "SELECT * FROM services WHERE NAME LIKE ? OR PRICE LIKE ?"
         params = ('%' + search_text + '%', '%' + search_text + '%')
@@ -349,7 +357,7 @@ class DeleteDialog(QDialog):
     def delete_product(self):
         index = main_window.table.currentRow()
         pro_id = main_window.table.item(index, 0).text()
-        connection = sqlite3.connect("database.db")
+        connection =DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute("DELETE FROM products WHERE PRODUCT_ID = ?", (pro_id,))
 
@@ -420,7 +428,7 @@ class EditDialog(QDialog):
         self.setLayout(layout)
 
     def update_product(self):
-        connection = sqlite3.connect("database.db")
+        connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute("update products SET NAME = ?, CATEGORY = ?, SELLING_PRICE = ?, COST_PRICE =?, QUANTITY = ?, DESCRIPTION = ? WHERE PRODUCT_ID = ?", (self.pro_Name.text(), self.pro_Cat_Name.itemText(self.pro_Cat_Name.currentIndex()), self.pro_Sp.text(), self.pro_Cp.text(), self.pro_Quantity.text(),self.pro_Des.text(), self.pro_id))
 
@@ -458,7 +466,7 @@ class EdithService(QDialog):
         self.setLayout(layout)
     
     def update_service(self):
-        connection = sqlite3.connect("database.db")
+        connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute("update services SET NAME = ?, PRICE = ?  WHERE SERVICE_ID = ?", (self.service_Name.text(), self.service_Price.text(), self.service_id))
 
@@ -520,7 +528,7 @@ class AddProducts(QDialog):
             QMessageBox.warning(self, "Input Error", "All fields must be filled.")
             return
 
-        connection = sqlite3.connect("database.db")
+        connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute("INSERT INTO products (NAME, CATEGORY, SELLING_PRICE, COST_PRICE, QUANTITY, DESCRIPTION) VALUES (?, ?, ?, ?, ?, ?)", (name, category, selling_price, cost_price, quantity, description))
 
@@ -560,7 +568,7 @@ class AddServices(QDialog):
             QMessageBox.warning(self, "Input Error", "All fields must be filled.")
             return
         
-        connection = sqlite3.connect("database.db")
+        connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute("INSERT INTO services (NAME, PRICE) VALUES (?, ?)", (name, price))
 

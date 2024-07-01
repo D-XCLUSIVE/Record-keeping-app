@@ -1,3 +1,5 @@
 .venv
 .idea
 text.py
+text.db
+me.py
