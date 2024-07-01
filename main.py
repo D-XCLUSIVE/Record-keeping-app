@@ -70,7 +70,6 @@ class MainWindow(QMainWindow):
         self.load_data()
 
         self.table.cellClicked.connect(self.cell_clicked_pro)
-
     
     def pro_search_bar(self):
         toolbar = QToolBar()
