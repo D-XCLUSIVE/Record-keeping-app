@@ -7,6 +7,7 @@ from PyQt6.QtGui import QAction
 import sqlite3
 import sys 
 from admin_login import LoginWindow
+from functions import table_function
 class DatabaseConnection:
     def __init__(self, database_file="database.db"):
         self.database_file = database_file
@@ -49,8 +50,10 @@ class MainWindow(QMainWindow):
 
         self.add_products_action = QAction("Add Products", self)
         self.add_service_action = QAction("Add Services", self)
+        self.add_staff_action = QAction("Add Staff", self)
         toolbar.addAction(self.add_products_action)
         toolbar.addAction(self.add_service_action)
+        toolbar.addAction(self.add_staff_action )
            
         
         self.service_search_bar = self.service_search_bar()
@@ -62,25 +65,15 @@ class MainWindow(QMainWindow):
 
         self.add_products_action.triggered.connect(self.add_product)
         self.add_service_action.triggered.connect(self.add_service)
+        self.add_staff_action.triggered.connect(self.add_staff)
 
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
 
         self.table.cellClicked.connect(self.cell_clicked_pro)
-    
-    def show_products(self):
-        self.add_products_action.setVisible(True)
-        self.add_service_action.setVisible(False)
-        self.pro_search_bar.setVisible(True)
-        self.service_search_bar.setVisible(False)
-        self.table = QTableWidget()
-        self.table.verticalHeader().setVisible(False)
-        self.table.setColumnCount(7)
-        self.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
-        self.setCentralWidget(self.table)
-        self.load_data()
 
-        self.table.cellClicked.connect(self.cell_clicked_pro)
+    def show_products(self):
+        table_function.show_products(self)
     
     def pro_search_bar(self):
         toolbar = QToolBar()
@@ -183,6 +176,22 @@ class MainWindow(QMainWindow):
         self.statusbar.addWidget(edit_button)
         self.statusbar.addWidget(delete_button)
         
+    def cell_clicked_staff(self):
+        edit_button = QPushButton("Edith Staff details")
+        edit_button.clicked.connect(self.edit_staff)
+
+        delete_button = QPushButton("Delete staff")
+        # delete_button.clicked.connect(self.delete_staff)
+
+
+        children = self.findChildren(QPushButton)
+        if children:
+            for child in children:
+                self.statusbar.removeWidget(child)
+
+        self.statusbar.addWidget(edit_button)
+        self.statusbar.addWidget(delete_button)
+
 
     def load_data(self):
         connection = sqlite3.connect("database.db")
@@ -203,39 +212,28 @@ class MainWindow(QMainWindow):
             for column_number, data in enumerate(row_data):
                 self.service_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
+    
+    def load_staff_data(self):
+        connection = sqlite3.connect("database.db")
+        result = connection.execute("SELECT * FROM staff")
+        self.staff_table.setRowCount(0)
+        for row_number, row_data in enumerate(result):
+            self.staff_table.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.staff_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        connection.close()
 
 
 
 
     def show_services(self):
-        self.statusbar.setVisible(True)
-        self.add_products_action.setVisible(False)
-        self.add_service_action.setVisible(True)
-        self.service_search_bar.setVisible(True)
-        self.pro_search_bar.setVisible(False)
-        self.service_table = QTableWidget()
-        self.service_table.verticalHeader().setVisible(False)
-        self.service_table.setColumnCount(3)
-        self.service_table.setHorizontalHeaderLabels(("ServiceID", "Name", "Price"))
-        self.setCentralWidget(self.service_table)
-        self.load_service_data()
-        self.service_table.cellClicked.connect(self.cell_clicked_service)
+       table_function.show_services(self)
              
     def show_staff(self):
-        self.add_products_action.setVisible(False)
-        self.staff_table = QTableWidget()
-        self.staff_table.setColumnCount(6)
-        self.staff_table.setHorizontalHeaderLabels(("StaffID", "Name", "Role", "ContactInfo", "Shedule", "Skill"))
-        
-        self.setCentralWidget(self.staff_table)
+        table_function.show_staff(self)
 
     def show_Transaction(self):
-        self.add_products_action.setVisible(False)
-        self.Transaction_table = QTableWidget()
-        self.Transaction_table.setColumnCount(9)
-        self.Transaction_table.setHorizontalHeaderLabels(("TransactionID", "Type", "Date", "ProductID/ServiceID", "Quantity/Duration", "Price", "TotalAmount", "PaymentMethod", "StaffID",))
-        
-        self.setCentralWidget(self.Transaction_table)
+       table_function.show_Transaction(self)
 
     def edit(self):
         dialog = EditDialog()
@@ -254,12 +252,20 @@ class MainWindow(QMainWindow):
         dialog = DeleteService()
         dialog.exec()
 
+    def edit_staff(self):
+        dialog = Deletestaff()
+        dialog.exec()
+
     def add_product(self):
         dialog = AddProducts()
         dialog.exec()
   
     def add_service(self):
         dialog = AddServices()
+        dialog.exec()
+    
+    def add_staff(self):
+        dialog = Addstaff()
         dialog.exec()
 
     def search_product(self):
@@ -278,7 +284,7 @@ class MainWindow(QMainWindow):
         cursor.close()
         connection.close() 
 
-
+   
         
    
 
@@ -330,13 +336,65 @@ class DeleteService(QDialog):
         confirmation_widget.setWindowTitle("Sucess")
         confirmation_widget.setText("The record was deleted successfully!")
         confirmation_widget.exec()
+
+class Deletestaff(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Delete Staff")
+        self.setFixedHeight(150)
+        self.setFixedWidth(200)
+
+        layout  = QGridLayout()
+
+        confirmation =QLabel("Are you sure you want to delete staff ?")
+        yes = QPushButton("Yes")
+        no = QPushButton("No")
+
+        layout.addWidget(confirmation, 0, 0, 1, 2)
+        layout.addWidget(yes, 1, 0)
+        layout.addWidget(no, 1, 0)
+
+        self.setLayout(layout)
+
+        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(20)
+
+        yes.clicked.connect(self.delete_staff)
+        no.clicked.connect(self.reject)
+        layout.addWidget(yes)
+
+        self.setLayout(layout)
+    
+    def delete_staff(self):
+        index = main_window.staff_table.currentRow()
+        staff_id = main_window.staff_table.item(index, 0).text()
+        
+
+        connection =DatabaseConnection().connect()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM staff WHERE STAFF_ID = ?", (staff_id,))
+
+        connection.commit()
+        cursor.close
+        connection.close()
+
+        # Refresh the table
+        main_window.load_staff_data()
+
+        self.close()
+
+        confirmation_widget = QMessageBox()
+        confirmation_widget.setWindowTitle("Sucess")
+        confirmation_widget.setText("The record was deleted successfully!")
+        confirmation_widget.exec()
+
 class DeleteDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Delete Product")
         self.setFixedWidth(200)
         self.setFixedHeight(150)
-        self.login = LoginWindow()
+        # self.login = LoginWindow()
 
         layout = QGridLayout()
         confirmation =QLabel("Are you sure you want to delete products ?")
@@ -361,7 +419,7 @@ class DeleteDialog(QDialog):
     def delete_product(self):
         index = main_window.table.currentRow()
         pro_id = main_window.table.item(index, 0).text()
-        print(pro_id[0])
+        
 
         connection =DatabaseConnection().connect()
         cursor = connection.cursor()
@@ -442,7 +500,6 @@ class EditDialog(QDialog):
         cursor.close()
         connection.close()
         main_window.load_data()
-
 class EdithService(QDialog):
     def __init__(self):
         super().__init__()
@@ -482,6 +539,56 @@ class EdithService(QDialog):
         main_window.load_service_data()
         self.close()
 
+class Addstaff(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Add Staff")
+        self.setFixedWidth(300)
+        self.setFixedHeight(300)
+
+        layout = QVBoxLayout()
+
+        self.staff_Name = QLineEdit()
+        self.staff_Name.setPlaceholderText("Product_Name")
+        layout.addWidget(self.staff_Name)
+
+        self.staff_Role = QLineEdit()
+        self.staff_Role.setPlaceholderText("Role")
+        layout.addWidget(self.staff_Role)
+
+        
+        self.staff_contact = QLineEdit()
+        self.staff_contact.setPlaceholderText("contact info")
+        layout.addWidget(self.staff_contact)
+
+        
+        self.password = QLineEdit()
+        self.password.setPlaceholderText("Password")
+        layout.addWidget(self.password)
+
+        button = QPushButton("Add staff")
+        button.clicked.connect(self.insert_staff)
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+    
+    def insert_staff(self):
+        name = self.staff_Name.text()
+        role = self.staff_Role.text()
+        contact = self.staff_contact.text()
+        password = self.password.text()
+
+        if not name or not role or not contact or not password:
+            QMessageBox.warning(self, "Input Error", "All fiels must be filled.")
+        
+        connection = DatabaseConnection().connect()
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO staff (STAFF_NAME, STAFF_ROLE, STAFF_CONTACT, PASSWORD) VALUES (?, ?, ?, ?)", (name, role, contact, password))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_staff_data()
 class AddProducts(QDialog):
     def __init__(self):
         super().__init__()
