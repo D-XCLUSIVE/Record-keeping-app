@@ -48,7 +48,7 @@ class table_function:
 
         self.staff_table = QTableWidget()
         self.staff_table.setColumnCount(5)
-        self.staff_table.verticalHeader().setVisible(False)
+        self.staff_table.verticalHeader().setVisible(True)
         self.staff_table.setHorizontalHeaderLabels(("StaffID", "Name", "Role", "ContactInfo", "Password"))
         self.load_staff_data()
         self.setCentralWidget(self.staff_table)

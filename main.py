@@ -181,7 +181,7 @@ class MainWindow(QMainWindow):
         edit_button.clicked.connect(self.edit_staff)
 
         delete_button = QPushButton("Delete staff")
-        # delete_button.clicked.connect(self.delete_staff)
+        delete_button.clicked.connect(self.delete_staff)
 
 
         children = self.findChildren(QPushButton)
@@ -223,9 +223,6 @@ class MainWindow(QMainWindow):
                 self.staff_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
 
-
-
-
     def show_services(self):
        table_function.show_services(self)
              
@@ -240,9 +237,12 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def edit_service(self):
-        dialog = EdithService()
+        dialog = EditService()
         dialog.exec()
-
+    
+    def edit_staff(self):
+        dialog = EditStaff()
+        dialog.exec() 
 
     def delete_pro(self):
         dialog = DeleteDialog()
@@ -252,7 +252,7 @@ class MainWindow(QMainWindow):
         dialog = DeleteService()
         dialog.exec()
 
-    def edit_staff(self):
+    def delete_staff(self):
         dialog = Deletestaff()
         dialog.exec()
 
@@ -283,11 +283,6 @@ class MainWindow(QMainWindow):
                 self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         cursor.close()
         connection.close() 
-
-   
-        
-   
-
 
 class DeleteService(QDialog):
     def __init__(self):
@@ -500,7 +495,7 @@ class EditDialog(QDialog):
         cursor.close()
         connection.close()
         main_window.load_data()
-class EdithService(QDialog):
+class EditService(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Update Service Data")
@@ -538,6 +533,57 @@ class EdithService(QDialog):
         connection.close()
         main_window.load_service_data()
         self.close()
+
+class EditStaff(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Edit Staff profile")
+        self.setFixedHeight(400)
+        self.setFixedWidth(250)
+
+        layout = QVBoxLayout()
+
+        index = main_window.staff_table.currentRow()
+        self.staff_id = main_window.staff_table.item(index, 0).text()
+        staff_name = main_window.staff_table.item(index, 1).text()
+        staff_Role = main_window.staff_table.item(index, 2).text()
+        staff_Contactinfo = main_window.staff_table.item(index, 3).text()
+        staff_Password = main_window.staff_table.item(index, 4).text()
+
+        self.staff_name = QLineEdit(staff_name)
+        self.staff_name.setPlaceholderText("staff Name")
+        layout.addWidget(self.staff_name)
+
+        self.staff_Role = QLineEdit(staff_Role)
+        self.staff_Role.setPlaceholderText("Role")
+        layout.addWidget(self.staff_Role)
+
+        self.staff_Contactinfo = QLineEdit( staff_Contactinfo)
+        self.staff_Contactinfo.setPlaceholderText("staff Name")
+        layout.addWidget(self.staff_Contactinfo)
+
+        self.staff_Password  = QLineEdit( staff_Password )
+        self.staff_Password .setPlaceholderText("staff Name")
+        layout.addWidget(self.staff_Password )
+
+        button = QPushButton("Update")
+        button.clicked.connect(self.update_staff)
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+
+    def update_staff(self):
+        connection = DatabaseConnection().connect()
+        cursor = connection.cursor()
+        cursor.execute("update staff SET STAFF_NAME = ?, STAFF_ROLE = ?, STAFF_CONTACT = ?, PASSWORD = ? WHERE STAFF_ID = ?", (self.staff_name.text(), self.staff_Role.text(), self.staff_Contactinfo.text(), self.staff_Password.text(), self.staff_id))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_staff_data()
+        self.close()
+
+
 
 class Addstaff(QDialog):
     def __init__(self):
