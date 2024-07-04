@@ -735,13 +735,50 @@ class AddServices(QDialog):
         cursor.close()
         connection.close()
         main_window.load_service_data()
+class option(QWidget):
+    def __init__(self):
+        super().__init__()  
+        self.setWindowTitle("Choose user")
+        self.setFixedHeight(200)
+        self.setFixedWidth(300)
+
+        layout = QGridLayout()
+        self.setLayout(layout)
         
+        qestion = QLabel("HOW DO YOU WANT TO LOGIN")
+        admin = QPushButton("ADMIN")
+        staff = QPushButton("STAFF")
+
+        layout.addWidget(qestion, 0, 0, 1, 2)
+        layout.addWidget(admin, 1, 0)
+        layout.addWidget(staff, 1, 1)
+        
+        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(20)
+
+        admin.clicked.connect(self.admin)
+        # staff.clicked.connect(self.staff)
+
+    def set_main_window(self, main_window, login_window):
+        self.main_window = main_window
+        self.login_window = login_window
+    
+    def admin(self):
+        self.login_window.show()
+        self.close()
+        # Add any other actions you want to perform when admin is clicked
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_window = MainWindow()
 
+    choose = option()
     login_window = LoginWindow()
     login_window.set_main_window(main_window)
-    login_window.show()
+    choose.set_main_window(main_window, login_window)
+    
+    choose.show()
 
     sys.exit(app.exec())
+
+    
