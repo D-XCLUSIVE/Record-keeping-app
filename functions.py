@@ -25,6 +25,15 @@ class table_function:
         main_window.load_data()
 
         main_window.table.cellClicked.connect(main_window.cell_clicked_pro)
+
+    
+    def show_user_products(main_window):
+        main_window.table = QTableWidget()
+        main_window.table.verticalHeader().setVisible(False)
+        main_window.table.setColumnCount(7)
+        main_window.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
+        main_window.setCentralWidget(main_window.table)
+        main_window.load_data()
         
     def show_services(self):
         self.statusbar.setVisible(True)
@@ -39,6 +48,23 @@ class table_function:
         self.setCentralWidget(self.service_table)
         self.load_service_data()
         self.service_table.cellClicked.connect(self.cell_clicked_service)
+
+    def show_user_services(self):
+        self.service_table = QTableWidget()
+        self.service_table.verticalHeader().setVisible(False)
+        self.service_table.setColumnCount(3)
+        self.service_table.setHorizontalHeaderLabels(("ServiceID", "Name", "Price"))
+        self.setCentralWidget(self.service_table)
+        self.load_service_data()
+
+    def show_user_transaction(self):
+        self.Transaction_table = QTableWidget()
+        self.Transaction_table.setColumnCount(6)
+        self.Transaction_table.setHorizontalHeaderLabels(("NAME", "PRICE", "Quantity", "Payment_Method", "StaffID", "Date",))
+        self.setCentralWidget(self.Transaction_table)
+        self.load_transaction()
+
+
 
     def show_staff(self): 
         self.pro_search_bar.setVisible(False)
