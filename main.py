@@ -583,8 +583,6 @@ class EditStaff(QDialog):
         main_window.load_staff_data()
         self.close()
 
-
-
 class Addstaff(QDialog):
     def __init__(self):
         super().__init__()

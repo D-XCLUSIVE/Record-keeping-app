@@ -60,7 +60,7 @@ class table_function:
     def show_user_transaction(self):
         self.Transaction_table = QTableWidget()
         self.Transaction_table.setColumnCount(6)
-        self.Transaction_table.setHorizontalHeaderLabels(("NAME", "PRICE", "Quantity", "Payment_Method", "StaffID", "Date",))
+        self.Transaction_table.setHorizontalHeaderLabels(("NAME", "PRICE", "Quantity", "Payment_Method", "STAFF_NAME", "Date",))
         self.setCentralWidget(self.Transaction_table)
         self.load_transaction()
 

@@ -2,10 +2,12 @@ from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLay
 from PyQt6.QtCore import pyqtSlot
 import sqlite3
 from PyQt6.QtGui import QAction
+from PyQt6.QtCore import Qt
 import sys
 from main import MainWindow as mw
 from functions import table_function
 from datetime import datetime
+from stafflogin import staffLoginWindow
 
 class DatabaseConnection:
     def __init__(self, database_file="database.db"):
@@ -20,10 +22,12 @@ class UserWindow(QMainWindow):
         super().__init__()
         main_window.setWindowTitle("Staff Page")
         main_window.setMinimumSize(800, 600)
+
         toolbar = QToolBar()
         toolbar.setMovable(False)
         main_window.addToolBar(toolbar)
 
+        main_window.showstaffname = QLabel()
         main_window.services_action = QAction("Service", main_window)
         main_window.products_action = QAction("Products", main_window)
         main_window.transactions_action = QAction("Transactions", main_window)
@@ -35,6 +39,7 @@ class UserWindow(QMainWindow):
         main_window.products_action.triggered.connect(main_window.show_products)
         main_window.transactions_action.triggered.connect(main_window.show_transactions)
 
+        
         main_window.statusbar = QStatusBar()
         main_window.setStatusBar(main_window.statusbar)
         sales_button = QPushButton("Make Sales")
@@ -44,7 +49,16 @@ class UserWindow(QMainWindow):
         services_button .clicked.connect(main_window.render_services)
         main_window.statusbar.addWidget(sales_button)
         main_window.statusbar.addWidget(services_button)
+
+        main_window.username_label = QLabel()  # Label to display the username
+        main_window.statusbar.addPermanentWidget(main_window.username_label)
+
         main_window.show_services()
+    
+    
+
+    def set_username(self, username):
+        self.username_label.setText(f"Welcome: {username}")
    
     def show_services(main_window):
         table_function.show_user_services(main_window)
@@ -67,7 +81,7 @@ class UserWindow(QMainWindow):
 
     def load_transaction(main_window):
         connection = sqlite3.connect("database.db")
-        result = connection.execute("SELECT NAME, SELLING_PRICE, QUANTITY, PAYMENT_METHOD, STAFF_ID, DATE FROM transactions")
+        result = connection.execute("SELECT NAME, SELLING_PRICE, QUANTITY, PAYMENT_METHOD, STAFF_NAME, DATE FROM transactions")
         main_window.Transaction_table.setRowCount(0)
         for row_number, row_data in enumerate(result):
             main_window.Transaction_table.insertRow(row_number)
@@ -75,14 +89,14 @@ class UserWindow(QMainWindow):
                 main_window.Transaction_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
 
-    def load_data(main_window):
+    def load_data(self):
         connection = sqlite3.connect("database.db")
         result = connection.execute("SELECT * FROM products")
-        main_window.table.setRowCount(0)
+        self.table.setRowCount(0)
         for row_number, row_data in enumerate(result):
-            main_window.table.insertRow(row_number)
+            self.table.insertRow(row_number)
             for column_number, data in enumerate(row_data):
-                main_window.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
 
     def make_sales(main_window):
@@ -117,17 +131,19 @@ class makesales(QDialog):
         self.product_cat.currentIndexChanged.connect(self.select_id)
         self.numberof_pro = QLineEdit()
         self.numberof_pro.setFixedHeight(20)
-        self.numberof_pro.setFixedWidth(40)
+        self.numberof_pro.setFixedWidth(70)
+        self.numberof_pro.setPlaceholderText("N0 of products")
         self.payment_method = QComboBox()
         method = ["CASH", "TRANSFER", "POS"]
         self.payment_method.addItems(method)
-        self.staff_id = QLineEdit()
-        self.staff_id = QLineEdit()
-        self.staff_id.setFixedHeight(20)
-        self.staff_id.setFixedWidth(40)
+        self.staff_name = QLineEdit()
+        self.staff_name.setPlaceholderText("staff id")
+        self.staff_name.setFixedHeight(20)
+        self.staff_name.setFixedWidth(40)
         self.note = QLineEdit()
         self.note.setFixedHeight(30)
         self.note.setFixedWidth(200)
+        self.note.setPlaceholderText("If any discount discribe")
         self.pro_id = QLabel()
 
         self.product_quan = QLabel("Quantity Left: N/A")
@@ -140,6 +156,8 @@ class makesales(QDialog):
         cursor.execute("SELECT NAME FROM products")
         for name in cursor.fetchall():
             self.product_name.addItem(name[0])
+
+        
             
         
         layout.addWidget(name_label)
@@ -151,7 +169,7 @@ class makesales(QDialog):
         layout.addWidget(self.numberof_pro)
         layout.addWidget(method_label)
         layout.addWidget(self.payment_method)
-        layout.addWidget(self.staff_id)
+        layout.addWidget(self.staff_name)
         layout.addWidget(self.note)
         layout.addWidget(self.product_quan)
         layout.addWidget(self.pro_id)
@@ -211,10 +229,10 @@ class makesales(QDialog):
         connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute("SELECT QUANTITY FROM products WHERE NAME = ?", (product_name,))
-        quantity = cursor.fetchone()
+        self.quantity = cursor.fetchone()
 
-        if quantity:
-            self.product_quan.setText(f"Quantity Left: {quantity[0]}")
+        if self.quantity:
+            self.product_quan.setText(f"Quantity Left: {self.quantity[0]}")
         else:
  
             self.product_quan.setText("Quantity Left: N/A")
@@ -224,11 +242,11 @@ class makesales(QDialog):
             print(a)
 
     def add_transaction(self):
-        dialog = makeorder( self.product_name.currentText(), self.product_price.currentText(), self.product_cat.currentText(), self.payment_method.currentText(), self.numberof_pro.text(), self.staff_id.text(), self.note.text(), self.pro_id.text() )
+        dialog = makeorder( self.product_name.currentText(), self.product_price.currentText(), self.product_cat.currentText(), self.payment_method.currentText(), self.numberof_pro.text(), self.staff_name.text(), self.note.text(), self.pro_id.text(), 
+        self.quantity)
         dialog.exec()
-
 class makeorder(QDialog):
-    def __init__(self, product_name, product_price, product_cat, product_method, numberof_product, staff_id, note, pro_id ):
+    def __init__(self, product_name, product_price, product_cat, product_method, numberof_product, staff_name, note, pro_id, product_quan ):
         super().__init__()
         self.setWindowTitle("Confirm Order")
         self.setFixedWidth(250)
@@ -245,8 +263,9 @@ class makeorder(QDialog):
         self.product_method = product_method
         self.numberof_pro = numberof_product
         self.note = note
-        self.staff_id = staff_id
+        self.staff_name = staff_name
         self.pro_id = pro_id
+        self.product_quan = product_quan
 
         layout.addWidget(confirmation, 0, 0, 1, 2)
         layout.addWidget(yes, 1, 0)
@@ -260,23 +279,31 @@ class makeorder(QDialog):
        date = datetime.now()
        date = str(date)
 
+       quantity_left = int(self.product_quan[0])
+       number_of_products = int(self.numberof_pro)
+        
+       new_quantity = quantity_left - number_of_products
+       
+
        connection = DatabaseConnection().connect()
        cursor = connection.cursor()
-       cursor.execute("INSERT  INTO transactions (PRODUCT_ID, NAME, PRO_CAT, SELLING_PRICE, QUANTITY, PAYMENT_METHOD, STAFF_ID, DATE, NOTE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.pro_id, self.product_name, self.product_cat, self.product_price, self.numberof_pro,  self.product_method, self.staff_id, date, self.note, ))
-    
-       connection.commit()
-       cursor.close()
-       connection.close()
+       if cursor.execute("INSERT  INTO transactions (PRODUCT_ID, NAME, PRO_CAT, SELLING_PRICE, QUANTITY, PAYMENT_METHOD, STAFF_NAME, DATE, NOTE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.pro_id, self.product_name, self.product_cat, self.product_price, self.numberof_pro,  self.product_method, self.staff_name, date, self.note, )):
+           cursor.execute("UPDATE products SET QUANTITY = ? WHERE PRODUCT_ID = ?", (new_quantity, self.pro_id))
 
-    
-       
        
 
-       print(f"{self.product_name}")
-       print(f"{self.product_price}")
-       print(f"{self.product_cat}")
-       print(f"{self.product_method}")
-       self.accept()  
+           connection.commit()
+           cursor.close()
+           connection.close()
+           self.accept()  
+
+
+    
+        
+       
+
+    
+      
 
 class renderservice(QDialog):
     def __init__(self):
@@ -366,7 +393,6 @@ class renderservice(QDialog):
     def add_servicetransaction(self):
         dialog = makeservice( self.service_name.currentText(), self.service_price.currentText(), self.payment_method.currentText(), self.staff_id.text(), self.note.text(), self.service_id.text() )
         dialog.exec()
-
 class makeservice(QDialog):
     def __init__(self, service_name, product_price, payment_method, staff_id, note, service_id ):
         super().__init__()
@@ -412,7 +438,13 @@ class makeservice(QDialog):
        self.accept()  
 
 
-app = QApplication(sys.argv)
-user_window = UserWindow()
-user_window.show()
-sys.exit(app.exec())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    user_window = UserWindow()
+    login_window = staffLoginWindow()
+    login_window.set_usermain_window(user_window)
+    
+    
+    login_window.show()
+
+    sys.exit(app.exec())
