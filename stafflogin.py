@@ -58,21 +58,22 @@ class staffLoginWindow(QWidget):
 
         query = ('SELECT * FROM staff WHERE STAFF_NAME = :username')
         self.cursor.execute(query, {"username": username})
-        result = self.cursor.fetchone()
-        if result:
-            if result[4] == password:
+        self.result = self.cursor.fetchone()
+        if self.result:
+            if self.result[4] == password:
 
                 time.sleep(1)  
                 self.user_window.show()
                 # self.user_window.load_data()
                 self.user_window.set_username(username)
                 self.close()
+                
+                
             else:
                 self.status.setText("Password is Incorrect ")
         else:
             self.status.setText("username is not found")
 
-    
-            
+           
     def set_usermain_window(self, user_window):
         self.user_window = user_window

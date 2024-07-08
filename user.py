@@ -56,9 +56,8 @@ class UserWindow(QMainWindow):
         main_window.show_services()
     
     
-
     def set_username(self, username):
-        self.username_label.setText(f"Welcome: {username}")
+        self.username_label.setText(username)
    
     def show_services(main_window):
         table_function.show_user_services(main_window)
@@ -100,7 +99,7 @@ class UserWindow(QMainWindow):
         connection.close()
 
     def make_sales(main_window):
-        dialog = makesales()
+        dialog = makesales(main_window.username_label.text())
         dialog.exec()
     
     def render_services(main_window):
@@ -108,7 +107,9 @@ class UserWindow(QMainWindow):
         dialog.exec()
 
 class makesales(QDialog):
-    def __init__(self):
+    def __init__(self, staff_username):
+        self.staff_username = staff_username
+        print(self.staff_username)
         super().__init__()
         self.setWindowTitle("Sales")
         self.setFixedHeight(500)
@@ -136,8 +137,8 @@ class makesales(QDialog):
         self.payment_method = QComboBox()
         method = ["CASH", "TRANSFER", "POS"]
         self.payment_method.addItems(method)
-        self.staff_name = QLineEdit()
-        self.staff_name.setPlaceholderText("staff id")
+        self.staff_name = QLineEdit(self.staff_username)
+        self.staff_name.setReadOnly(True) 
         self.staff_name.setFixedHeight(20)
         self.staff_name.setFixedWidth(40)
         self.note = QLineEdit()
@@ -156,9 +157,6 @@ class makesales(QDialog):
         cursor.execute("SELECT NAME FROM products")
         for name in cursor.fetchall():
             self.product_name.addItem(name[0])
-
-        
-            
         
         layout.addWidget(name_label)
         layout.addWidget(self.product_name)
@@ -195,9 +193,6 @@ class makesales(QDialog):
             self.product_price.addItem(str(price[0]))
 
         self.pro_quantity() # Update the quantity whenever the price is updated
-
-    
-
 
     def update_cat(self):
         product_name = self.product_name.currentText()
@@ -289,6 +284,7 @@ class makeorder(QDialog):
        cursor = connection.cursor()
        if cursor.execute("INSERT  INTO transactions (PRODUCT_ID, NAME, PRO_CAT, SELLING_PRICE, QUANTITY, PAYMENT_METHOD, STAFF_NAME, DATE, NOTE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.pro_id, self.product_name, self.product_cat, self.product_price, self.numberof_pro,  self.product_method, self.staff_name, date, self.note, )):
            cursor.execute("UPDATE products SET QUANTITY = ? WHERE PRODUCT_ID = ?", (new_quantity, self.pro_id))
+           
 
        
 
@@ -297,13 +293,6 @@ class makeorder(QDialog):
            connection.close()
            self.accept()  
 
-
-    
-        
-       
-
-    
-      
 
 class renderservice(QDialog):
     def __init__(self):
