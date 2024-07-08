@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton, QMessageBox, QComboBox, QStatusBar, QHBoxLayout, QSizePolicy
+from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton, QMessageBox, QComboBox, QStatusBar, QHBoxLayout, QSizePolicy, QHeaderView
 import time 
  
 
@@ -19,7 +19,47 @@ class table_function:
         main_window.service_search_bar.setVisible(False)
         main_window.table = QTableWidget()
         main_window.table.verticalHeader().setVisible(False)
+        main_window.table.horizontalHeader().setMinimumHeight(70)
         main_window.table.setColumnCount(7)
+        main_window.table.setColumnWidth(0, 190)
+        main_window.table.setColumnWidth(1, 190)
+        main_window.table.setColumnWidth(2, 190)
+        main_window.table.setColumnWidth(3, 190)
+        main_window.table.setColumnWidth(4, 190)
+        main_window.table.setColumnWidth(5, 190)
+        main_window.table.setColumnWidth(6, 190)
+        main_window.table.setStyleSheet("""
+            QTableWidget {
+                background-color: #fff;
+                alternate-background-color: #f0f0f0; /* Alternate row background color */
+                border: 1px solid #ccc;
+                gridline-color: #ccc;
+            }
+            QTableWidget::item {
+                padding: 5px;
+                border-bottom: 1px solid #ccc;
+            }
+            QTableWidget::item:selected {
+                background-color:#aaa; /* Selected item background color */
+                color: black;  
+                outline: none;                        
+            }
+            QHeaderView::section {
+                background-color: #f0f0f0;  /* Background color for headers */
+                padding: 4px;
+                border: 1px solid #ccc;
+                font-size: 14px;
+            }
+                                        
+            QHeaderView::section:vertical {
+                 background-color: #d0d0d0;  /* Different color for vertical headers if desired */
+            }
+            QHeaderView::section:hover {
+                 background-color: #e0e0e0;  /* Hover effect */
+            }
+           
+        """)
+        
         main_window.table.setHorizontalHeaderLabels(("PRODUCT_ID", "NAME", "CATEGORY", "SELLING_PRICE", "COST_PRICE", "QUANTITY", "DESCRIPTION"))
         main_window.setCentralWidget(main_window.table)
         main_window.load_data()
@@ -44,10 +84,43 @@ class table_function:
         self.service_table = QTableWidget()
         self.service_table.verticalHeader().setVisible(False)
         self.service_table.setColumnCount(3)
+        self.service_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #fff;
+                alternate-background-color: #f0f0f0; /* Alternate row background color */
+                border: 1px solid #ccc;
+                gridline-color: #ccc;
+            }
+            QTableWidget::item {
+                padding: 5px;
+                border-bottom: 1px solid #ccc;
+            }
+            QTableWidget::item:selected {
+                background-color:#aaa; /* Selected item background color */
+                color: black;  
+                outline: none;                        
+            }
+            QHeaderView::section {
+                background-color: #f0f0f0;  /* Background color for headers */
+                padding: 4px;
+                border: 1px solid #ccc;
+                font-size: 14px;
+            }
+                                        
+            QHeaderView::section:vertical {
+                 background-color: #d0d0d0;  /* Different color for vertical headers if desired */
+            }
+            QHeaderView::section:hover {
+                 background-color: #e0e0e0;  /* Hover effect */
+            }
+           
+        """)
+        
         self.service_table.setHorizontalHeaderLabels(("ServiceID", "Name", "Price"))
         self.setCentralWidget(self.service_table)
         self.load_service_data()
         self.service_table.cellClicked.connect(self.cell_clicked_service)
+
 
     def show_user_services(self):
         self.service_table = QTableWidget()
@@ -63,8 +136,6 @@ class table_function:
         self.Transaction_table.setHorizontalHeaderLabels(("NAME", "PRICE", "Quantity", "Payment_Method", "STAFF_NAME", "Date",))
         self.setCentralWidget(self.Transaction_table)
         self.load_transaction()
-
-
 
     def show_staff(self): 
         self.pro_search_bar.setVisible(False)

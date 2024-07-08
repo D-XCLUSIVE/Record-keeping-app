@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton, QMessageBox, QComboBox, QStatusBar, QHBoxLayout, QSizePolicy
+from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton, QMessageBox, QComboBox, QStatusBar, QHBoxLayout, QSizePolicy, QGraphicsOpacityEffect
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve
 import time 
  
 
@@ -9,6 +10,7 @@ import sys
 from admin_login import LoginWindow
 from stafflogin import staffLoginWindow
 from user import UserWindow
+from styles.stylesheets import apply_animation, apply_styles, apply_animationon, apply_styleson, apply_animationOndelete, apply_stylesonOndelete
 from functions import table_function
 class DatabaseConnection:
     def __init__(self, database_file="database.db"):
@@ -61,18 +63,62 @@ class MainWindow(QMainWindow):
         self.service_search_bar = self.service_search_bar()
         self.pro_search_bar = self.pro_search_bar()
         self.show_products()
-        
-        
-        
 
         self.add_products_action.triggered.connect(self.add_product)
         self.add_service_action.triggered.connect(self.add_service)
         self.add_staff_action.triggered.connect(self.add_staff)
 
+        apply_styleson(self)
+        apply_animationon(self)
+
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
 
         self.table.cellClicked.connect(self.cell_clicked_pro)
+    
+        # self.setStyleSheet("""
+        #     /* Menu and toolbar styles */
+        #     QMenuBar {
+        #         background-color: #333;
+        #         color: white;
+        #     }
+        #     QMenuBar::item {
+        #         background-color: #333;
+        #         padding: 4px 10px;
+        #     }
+        #     QMenuBar::item:selected {
+        #         background-color: #555;
+        #     }
+        #     QMenu {
+        #         background-color: #333;
+        #         border: 1px solid #555;
+        #         padding: 5px;
+        #     }
+        #     QMenu::item {
+        #         background-color: transparent;
+        #         color: white;
+        #         padding: 5px 20px;
+        #     }
+        #     QMenu::item:selected {
+        #         background-color: #555;
+        #     }
+        #     QToolBar {
+        #         background-color: #666;
+        #         border: none;
+        #     }
+        #     QToolBar::handle {
+        #         background-color: #888;
+        #     }
+        #     QToolBar QToolButton {
+        #         background-color: #888;
+        #         border: none;
+        #         padding: 5px;
+        #     }
+        #     QToolBar QToolButton:hover {
+        #         background-color: #aaa;
+        #     }
+        # """)
+
 
     def show_products(self):
         table_function.show_products(self)
@@ -85,9 +131,31 @@ class MainWindow(QMainWindow):
         self.Pro_search_input = QLineEdit()
         self.Pro_search_input.setPlaceholderText("Search for a product...")
         self.Pro_search_input.setMinimumWidth(400)
+        self.Pro_search_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #fff; /* White background */
+                padding: 5px; /* Padding for input */
+                border: 1px solid #ccc; /* Remove border */
+                border-radius: 3px; /* Rounded corners */
+            }
+            QLineEdit:focus {
+                border: 1px solid #aaa; /* Border color on focus */
+            }
+        """)
         search_button = QPushButton("Search")
         search_button.clicked.connect(self.search_product)
         search_button.setMinimumWidth(100)
+        search_button.setStyleSheet("""
+            QPushButton {
+                background-color: #888;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+            }
+            QPushButton:hover {
+                background-color: #aaa;
+            }
+        """)
         search_widget = QWidget()
         search_layout = QHBoxLayout(search_widget)
 
@@ -102,7 +170,6 @@ class MainWindow(QMainWindow):
 
         return toolbar
 
-
     def service_search_bar(self):
         toolbar = QToolBar()
         toolbar.setMovable(False)
@@ -110,10 +177,32 @@ class MainWindow(QMainWindow):
 
         self.Service_search_input = QLineEdit()
         self.Service_search_input.setPlaceholderText("Search for a services...")
+        self.Service_search_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #fff; /* White background */
+                padding: 5px; /* Padding for input */
+                border: 1px solid #ccc; /* Remove border */
+                border-radius: 3px; /* Rounded corners */
+            }
+            QLineEdit:focus {
+                border: 1px solid #aaa; /* Border color on focus */
+            }
+        """)
         self.Service_search_input.setMinimumWidth(400)
         search_button = QPushButton("Search_Services")
         search_button.clicked.connect(self.search_service)
         search_button.setMinimumWidth(100)
+        search_button.setStyleSheet("""
+            QPushButton {
+                background-color: #888;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+            }
+            QPushButton:hover {
+                background-color: #aaa;
+            }
+        """)
         search_widget = QWidget()
         search_layout = QHBoxLayout(search_widget)
 
@@ -143,13 +232,53 @@ class MainWindow(QMainWindow):
         cursor.close()
         connection.close()
 
-        
-
     def cell_clicked_pro(self):
         edit_button = QPushButton("Edith Record")
+        edit_button.setStyleSheet("""
+        QPushButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #45a049;
+            color: white;
+        }
+    """)
         edit_button.clicked.connect(self.edit)
 
         delete_button = QPushButton("Delete Record")
+        delete_button.setStyleSheet("""
+        QPushButton {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #e53935;
+            color: white;
+        }
+    """)
         delete_button.clicked.connect(self.delete_pro)
 
 
@@ -161,12 +290,55 @@ class MainWindow(QMainWindow):
         self.statusbar.addWidget(edit_button)
         self.statusbar.addWidget(delete_button)
 
-
     def cell_clicked_service(self):
         edit_button = QPushButton("Edith Service")
+        edit_button.setStyleSheet("""
+        QPushButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #45a049;
+            color: white;
+        }
+    """)
         edit_button.clicked.connect(self.edit_service)
 
         delete_button = QPushButton("Delete Service")
+        delete_button = QPushButton("Delete Record")
+        delete_button.setStyleSheet("""
+        QPushButton {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #e53935;
+            color: white;
+        }
+    """)
+
         delete_button.clicked.connect(self.delete_service)
 
 
@@ -308,10 +480,14 @@ class DeleteService(QDialog):
         layout.setVerticalSpacing(20)
 
        
+       
         yes.clicked.connect(self.delete_service)
         no.clicked.connect(self.reject)
         layout.addWidget(yes)
+        apply_stylesonOndelete(self)
+        apply_animationOndelete(self)
         self.setLayout(layout)
+   
 
     def delete_service(self):
         index = main_window.service_table.currentRow()
@@ -411,6 +587,8 @@ class DeleteDialog(QDialog):
         yes.clicked.connect(self.delete_product)
         no.clicked.connect(self.reject)
         layout.addWidget(yes)
+        apply_stylesonOndelete(self)
+        apply_animationOndelete(self)
         self.setLayout(layout)
 
     def delete_product(self):
@@ -487,6 +665,8 @@ class EditDialog(QDialog):
         layout.addWidget(button)
 
         self.setLayout(layout)
+        apply_styles(self)
+        apply_animation(self)
 
     def update_product(self):
         connection = DatabaseConnection().connect()
@@ -524,6 +704,8 @@ class EditService(QDialog):
         layout.addWidget(button)
 
         self.setLayout(layout)
+        apply_styles(self)
+        apply_animation(self)
     
     def update_service(self):
         connection = DatabaseConnection().connect()
@@ -672,8 +854,13 @@ class AddProducts(QDialog):
         button = QPushButton("Add")
         button.clicked.connect(self.insert_product)
         layout.addWidget(button)
-
         self.setLayout(layout)
+        apply_styles(self)
+        apply_animation(self)
+
+   
+
+
 
     def insert_product(self):
         name = self.pro_Name.text()
@@ -716,8 +903,9 @@ class AddServices(QDialog):
         button = QPushButton("Add")
         button.clicked.connect(self.insert_service)
         layout.addWidget(button)
-
         self.setLayout(layout)
+        apply_styles(self)
+        apply_animation(self)
 
     def insert_service(self):
         name = self.Service_Name.text()
