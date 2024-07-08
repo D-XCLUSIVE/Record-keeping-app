@@ -7,6 +7,8 @@ from PyQt6.QtGui import QAction
 import sqlite3
 import sys 
 from admin_login import LoginWindow
+from stafflogin import staffLoginWindow
+from user import UserWindow
 from functions import table_function
 class DatabaseConnection:
     def __init__(self, database_file="database.db"):
@@ -755,25 +757,37 @@ class option(QWidget):
         layout.setVerticalSpacing(20)
 
         admin.clicked.connect(self.admin)
-        # staff.clicked.connect(self.staff)
+        staff.clicked.connect(self.staff)
 
-    def set_main_window(self, main_window, login_window):
+    def set_main_window(self, main_window, login_window, staff_login):
         self.main_window = main_window
         self.login_window = login_window
+        self.staff_login = staff_login
     
     def admin(self):
         self.login_window.show()
         self.close()
         # Add any other actions you want to perform when admin is clicked
+    
+    def staff(self):
+        self.staff_login.show()
+        self.close()
+        # Add any other actions you want to perform when staff is clicked
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_window = MainWindow()
-
+    usermain = UserWindow()
     choose = option()
     login_window = LoginWindow()
+    staff_login = staffLoginWindow()
+
+    staff_login.set_usermain_window(usermain)
+
     login_window.set_main_window(main_window)
-    choose.set_main_window(main_window, login_window)
+    
+
+    choose.set_main_window(main_window, login_window,    staff_login)
     
     choose.show()
 

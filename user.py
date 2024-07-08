@@ -4,7 +4,6 @@ import sqlite3
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 import sys
-from main import MainWindow as mw
 from functions import table_function
 from datetime import datetime
 from stafflogin import staffLoginWindow
@@ -432,7 +431,6 @@ if __name__ == '__main__':
     user_window = UserWindow()
     login_window = staffLoginWindow()
     login_window.set_usermain_window(user_window)
-    
     
     login_window.show()
 
