@@ -48,6 +48,35 @@ class staffLoginWindow(QWidget):
 
         self.connectTodb()
 
+        self.setStyleSheet("""
+                QWidget {
+                    background-color: white;
+                    border: 2px solid blue;
+                    border-radius: 10px;
+                }
+                QLabel, QLineEdit {
+                    background-color: white;
+                    color: black;
+                    border: 1px solid gray;
+                    border-radius: 5px;
+                    padding: 5px;
+                }
+                QPushButton {
+                    background-color: green;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 7px;
+                }
+                QPushButton:hover {
+                    background-color: lightgreen;
+                }
+                QLabel#status {
+                    color: red;
+                }
+            """)
+
+
     def connectTodb(self):
         self.connections = sqlite3.connect("database.db")
         self.cursor = self.connections.cursor()

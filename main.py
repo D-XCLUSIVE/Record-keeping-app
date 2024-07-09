@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, QGridLayout, QLineEdit, QMainWindow, QTableWidget, QToolBar, QDialog, QTableWidgetItem, QPushButton, QMessageBox, QComboBox, QStatusBar, QHBoxLayout, QSizePolicy, QGraphicsOpacityEffect
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve
 import time 
+from PyQt6.QtGui import QFont
  
 
 from PyQt6.QtCore import Qt
@@ -19,7 +20,6 @@ class DatabaseConnection:
     def connect(self):
         connections = sqlite3.connect(self.database_file)
         return connections
-
 
 class MainWindow(QMainWindow):
 
@@ -234,6 +234,7 @@ class MainWindow(QMainWindow):
 
     def cell_clicked_pro(self):
         edit_button = QPushButton("Edith Record")
+        edit_button.clicked.connect(self.edit)
         edit_button.setStyleSheet("""
         QPushButton {
             background-color: #4CAF50;
@@ -255,9 +256,9 @@ class MainWindow(QMainWindow):
             color: white;
         }
     """)
-        edit_button.clicked.connect(self.edit)
 
         delete_button = QPushButton("Delete Record")
+        delete_button.clicked.connect(self.edit)
         delete_button.setStyleSheet("""
         QPushButton {
             background-color: #f44336;
@@ -353,8 +354,49 @@ class MainWindow(QMainWindow):
     def cell_clicked_staff(self):
         edit_button = QPushButton("Edith Staff details")
         edit_button.clicked.connect(self.edit_staff)
-
+        edit_button.setStyleSheet("""
+        QPushButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #45a049;
+            color: white;
+        }
+    """)
         delete_button = QPushButton("Delete staff")
+        delete_button.setStyleSheet("""
+        QPushButton {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #e53935;
+            color: white;
+        }
+    """)
         delete_button.clicked.connect(self.delete_staff)
 
 
@@ -395,6 +437,16 @@ class MainWindow(QMainWindow):
             self.staff_table.insertRow(row_number)
             for column_number, data in enumerate(row_data):
                 self.staff_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        connection.close()
+
+    def load_transactionsAdmin(self):
+        connection = sqlite3.connect("database.db")
+        result = connection.execute("SELECT PRO_CAT, NAME, SELLING_PRICE, QUANTITY, PAYMENT_METHOD, STAFF_NAME, DATE, NOTE  FROM transactions")
+        self.Transaction_table.setRowCount(0)
+        for row_number, row_data in enumerate(result):
+            self.Transaction_table.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.Transaction_table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
 
     def show_services(self):
@@ -535,6 +587,8 @@ class Deletestaff(QDialog):
         yes.clicked.connect(self.delete_staff)
         no.clicked.connect(self.reject)
         layout.addWidget(yes)
+        apply_stylesonOndelete(self)
+        apply_animationOndelete(self)
 
         self.setLayout(layout)
     
@@ -613,60 +667,67 @@ class DeleteDialog(QDialog):
         confirmation_widget.setWindowTitle("Sucess")
         confirmation_widget.setText("The record was deleted successfully!")
         confirmation_widget.exec()
+
 class EditDialog(QDialog):
     def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Update Product Data")
-        self.setFixedWidth(300)
-        self.setFixedHeight(300)
-
-        layout = QVBoxLayout()
-
-        index = main_window.table.currentRow()
-        pro_Name = main_window.table.item(index, 1).text()
-
-        self.pro_id = main_window.table.item(index, 0).text()
-
-        self.pro_Name = QLineEdit(pro_Name)
-        self.pro_Name.setPlaceholderText("Product Name")
-        layout.addWidget(self.pro_Name)
-
-        pro_Cat = main_window.table.item(index, 2).text()
-        self.pro_Cat_Name = QComboBox()
-        pro_Cat_Grade =["Grade 1", "Grade 2", "Grade 3"]
-        self.pro_Cat_Name.addItems(pro_Cat_Grade)
-        self.pro_Cat_Name.setCurrentText(pro_Cat)
-        layout.addWidget(self.pro_Cat_Name)
-
-        pro_Sp = main_window.table.item(index, 3).text()
-        self.pro_Sp = QLineEdit(pro_Sp)
-        self.pro_Sp.setPlaceholderText("Selling Price")
-        layout.addWidget(self.pro_Sp)
-
-        pro_Cp = main_window.table.item(index, 4).text()
-        self.pro_Cp = QLineEdit(pro_Cp)
-        self.pro_Sp.setPlaceholderText("Cost Price")
-        layout.addWidget(self.pro_Cp)
-
-        pro_Quantity = main_window.table.item(index, 5).text()
-        self.pro_Quantity = QLineEdit(pro_Quantity)
-        self.pro_Quantity.setPlaceholderText("Quantity")
-        layout.addWidget(self.pro_Quantity)
-
-        pro_Des = main_window.table.item(index, 6).text()
-        self.pro_Des = QLineEdit(pro_Des)
-        self.pro_Des.setPlaceholderText("Description")
-        layout.addWidget(self.pro_Des)
+    
+            super().__init__()
+        
+            self.setWindowTitle("Update Product Data")
+            self.setFixedWidth(300)
+            self.setFixedHeight(300)
 
 
+            layout = QVBoxLayout()
+            try:
+                index = main_window.table.currentRow()
+                if index < 0: 
+                    raise RuntimeError("No row selected")
+                
+                pro_Name = main_window.table.item(index, 1).text()
+                self.pro_id = main_window.table.item(index, 0).text()
+                self.pro_Name = QLineEdit(pro_Name)
+                self.pro_Name.setPlaceholderText("Product Name")
+                layout.addWidget(self.pro_Name)
 
-        button = QPushButton("Update")
-        button.clicked.connect(self.update_product)
-        layout.addWidget(button)
+                pro_Cat = main_window.table.item(index, 2).text()
+                self.pro_Cat_Name = QComboBox()
+                pro_Cat_Grade =["Grade 1", "Grade 2", "Grade 3"]
+                self.pro_Cat_Name.addItems(pro_Cat_Grade)
+                self.pro_Cat_Name.setCurrentText(pro_Cat)
+                layout.addWidget(self.pro_Cat_Name)
 
-        self.setLayout(layout)
-        apply_styles(self)
-        apply_animation(self)
+                pro_Sp = main_window.table.item(index, 3).text()
+                self.pro_Sp = QLineEdit(pro_Sp)
+                self.pro_Sp.setPlaceholderText("Selling Price")
+                layout.addWidget(self.pro_Sp)
+
+                pro_Cp = main_window.table.item(index, 4).text()
+                self.pro_Cp = QLineEdit(pro_Cp)
+                self.pro_Sp.setPlaceholderText("Cost Price")
+                layout.addWidget(self.pro_Cp)
+
+                pro_Quantity = main_window.table.item(index, 5).text()
+                self.pro_Quantity = QLineEdit(pro_Quantity)
+                self.pro_Quantity.setPlaceholderText("Quantity")
+                layout.addWidget(self.pro_Quantity)
+
+                pro_Des = main_window.table.item(index, 6).text()
+                self.pro_Des = QLineEdit(pro_Des)
+                self.pro_Des.setPlaceholderText("Description")
+                layout.addWidget(self.pro_Des)
+            except RuntimeError as e:
+                table_function.handle_runtime_error(self, e)
+                
+            button = QPushButton("Update")
+            button.clicked.connect(self.update_product)
+            layout.addWidget(button)
+
+            self.setLayout(layout)
+            apply_styles(self)
+            apply_animation(self)    
+
+        
 
     def update_product(self):
         connection = DatabaseConnection().connect()
@@ -677,6 +738,12 @@ class EditDialog(QDialog):
         cursor.close()
         connection.close()
         main_window.load_data()
+
+
+
+
+
+
 class EditService(QDialog):
     def __init__(self):
         super().__init__()
@@ -755,6 +822,8 @@ class EditStaff(QDialog):
         layout.addWidget(button)
 
         self.setLayout(layout)
+        apply_styles(self)
+        apply_animation(self)
 
     def update_staff(self):
         connection = DatabaseConnection().connect()
@@ -797,8 +866,11 @@ class Addstaff(QDialog):
         button = QPushButton("Add staff")
         button.clicked.connect(self.insert_staff)
         layout.addWidget(button)
-
         self.setLayout(layout)
+        apply_styles(self)
+        apply_animation(self)
+
+        
     
     def insert_staff(self):
         name = self.staff_Name.text()
@@ -857,10 +929,6 @@ class AddProducts(QDialog):
         self.setLayout(layout)
         apply_styles(self)
         apply_animation(self)
-
-   
-
-
 
     def insert_product(self):
         name = self.pro_Name.text()
@@ -934,8 +1002,39 @@ class option(QWidget):
         self.setLayout(layout)
         
         qestion = QLabel("HOW DO YOU WANT TO LOGIN")
+        qestion.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        qestion.setFont(QFont("Arial", 12, QFont.Weight.Bold))
         admin = QPushButton("ADMIN")
+        admin.setStyleSheet(
+            '''
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: 2px solid #1976D2;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+            '''
+        )
+        
         staff = QPushButton("STAFF")
+        staff.setStyleSheet(
+            '''
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: 2px solid #388E3C;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #388E3C;
+            }
+            '''
+        )
 
         layout.addWidget(qestion, 0, 0, 1, 2)
         layout.addWidget(admin, 1, 0)

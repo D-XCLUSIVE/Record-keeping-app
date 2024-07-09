@@ -12,7 +12,7 @@ import sys
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Login Window")
+        self.setWindowTitle("Admin Login")
         self.setFixedHeight(200)
         self.setFixedWidth(600)
 
@@ -46,6 +46,34 @@ class LoginWindow(QWidget):
         self.status.setStyleSheet('font-size: 20px; color: red;')
         layout.addWidget(self.status, 3, 0, 1, 3)
 
+
+        self.setStyleSheet("""
+                QWidget {
+                    background-color: white;
+                    border: 2px solid blue;
+                    border-radius: 10px;
+                }
+                QLabel, QLineEdit {
+                    background-color: white;
+                    color: black;
+                    border: 1px solid gray;
+                    border-radius: 5px;
+                    padding: 5px;
+                }
+                QPushButton {
+                    background-color: green;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 7px;
+                }
+                QPushButton:hover {
+                    background-color: lightgreen;
+                }
+                QLabel#status {
+                    color: red;
+                }
+            """)
         self.connectTodb()
 
     def connectTodb(self):

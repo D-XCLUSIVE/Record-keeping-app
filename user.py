@@ -7,6 +7,7 @@ import sys
 from functions import table_function
 from datetime import datetime
 from stafflogin import staffLoginWindow
+from styles.stylesheets import apply_animation, apply_styles, apply_animationon, apply_styleson, apply_animationOndelete, apply_stylesonOndelete
 
 class DatabaseConnection:
     def __init__(self, database_file="database.db"):
@@ -38,14 +39,56 @@ class UserWindow(QMainWindow):
         main_window.products_action.triggered.connect(main_window.show_products)
         main_window.transactions_action.triggered.connect(main_window.show_transactions)
 
-        
+        apply_styleson(main_window)
+        apply_animationon(main_window)
         main_window.statusbar = QStatusBar()
         main_window.setStatusBar(main_window.statusbar)
         sales_button = QPushButton("Make Sales")
         sales_button.clicked.connect(main_window.make_sales)
-
+        sales_button.setStyleSheet("""
+        QPushButton {
+            background-color: #008000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #4CAF50 ;
+            color: white;
+        }
+    """)
         services_button = QPushButton("Render Service")
         services_button .clicked.connect(main_window.render_services)
+        services_button.setStyleSheet("""
+        QPushButton {
+            background-color: #00008B;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        QPushButton:hover {
+            background-color: #0000CD;
+            color: white;
+        }
+    """)
         main_window.statusbar.addWidget(sales_button)
         main_window.statusbar.addWidget(services_button)
 
@@ -102,7 +145,7 @@ class UserWindow(QMainWindow):
         dialog.exec()
     
     def render_services(main_window):
-        dialog = renderservice()
+        dialog = renderservice(main_window.username_label.text())
         dialog.exec()
 
 class makesales(QDialog):
@@ -110,7 +153,7 @@ class makesales(QDialog):
         self.staff_username = staff_username
         print(self.staff_username)
         super().__init__()
-        self.setWindowTitle("Sales")
+        self.setWindowTitle("SALES")
         self.setFixedHeight(500)
         self.setFixedWidth(350)
         self.initUI()
@@ -130,16 +173,16 @@ class makesales(QDialog):
         self.product_cat = QComboBox()
         self.product_cat.currentIndexChanged.connect(self.select_id)
         self.numberof_pro = QLineEdit()
-        self.numberof_pro.setFixedHeight(20)
-        self.numberof_pro.setFixedWidth(70)
-        self.numberof_pro.setPlaceholderText("N0 of products")
+        self.numberof_pro.setFixedHeight(30)
+        self.numberof_pro.setFixedWidth(80)
+        self.numberof_pro.setPlaceholderText("Quantity")
         self.payment_method = QComboBox()
         method = ["CASH", "TRANSFER", "POS"]
         self.payment_method.addItems(method)
         self.staff_name = QLineEdit(self.staff_username)
         self.staff_name.setReadOnly(True) 
-        self.staff_name.setFixedHeight(20)
-        self.staff_name.setFixedWidth(40)
+        self.staff_name.setFixedHeight(30)
+        self.staff_name.setFixedWidth(100)
         self.note = QLineEdit()
         self.note.setFixedHeight(30)
         self.note.setFixedWidth(200)
@@ -171,7 +214,8 @@ class makesales(QDialog):
         layout.addWidget(self.product_quan)
         layout.addWidget(self.pro_id)
         layout.addWidget(button)
-
+        apply_styles(self)
+        apply_animation(self) 
         layout.addStretch(1)
 
         self.update_price()
@@ -266,7 +310,9 @@ class makeorder(QDialog):
         layout.addWidget(no, 1, 1)
 
         yes.clicked.connect(self.add_transaction)
-
+        no.clicked.connect(self.reject)
+        apply_styles(self)
+        apply_animation(self)
         self.setLayout(layout)
 
     def add_transaction(self):
@@ -294,10 +340,11 @@ class makeorder(QDialog):
 
 
 class renderservice(QDialog):
-    def __init__(self):
+    def __init__(self, staff_username):
+        self.staff_username = staff_username
         super().__init__()
-        self.setWindowTitle("Sales")
-        self.setFixedHeight(350)
+        self.setWindowTitle("SERVICES")
+        self.setFixedHeight(400)
         self.setFixedWidth(300)
         self.initUI()
 
@@ -315,10 +362,10 @@ class renderservice(QDialog):
         self.payment_method = QComboBox()
         method = ["CASH", "TRANSFER", "POS"]
         self.payment_method.addItems(method)
-        self.staff_id = QLineEdit()
-        self.staff_id.setPlaceholderText("staff_id")
-        self.staff_id.setFixedHeight(20)
-        self.staff_id.setFixedWidth(40)
+        self.staff_name = QLineEdit(self.staff_username)
+        self.staff_name.setReadOnly(True)
+        self.staff_name.setFixedHeight(30)
+        self.staff_name.setFixedWidth(100)
         self.note = QLineEdit()
         self.note.setFixedHeight(30)
         self.note.setFixedWidth(200)
@@ -341,10 +388,12 @@ class renderservice(QDialog):
         layout.addWidget(self.service_price)
         layout.addWidget(method_label)
         layout.addWidget(self.payment_method)
-        layout.addWidget(self.staff_id)
+        layout.addWidget(self.staff_name)
         layout.addWidget(self.note)
         layout.addWidget(self.service_id)
         layout.addWidget(button)
+        apply_styles(self)
+        apply_animation(self)
 
 
         self.update_serprice()
@@ -379,7 +428,7 @@ class renderservice(QDialog):
             self.service_id.setText(str(ID[0]))
 
     def add_servicetransaction(self):
-        dialog = makeservice( self.service_name.currentText(), self.service_price.currentText(), self.payment_method.currentText(), self.staff_id.text(), self.note.text(), self.service_id.text() )
+        dialog = makeservice( self.service_name.currentText(), self.service_price.currentText(), self.payment_method.currentText(), self.staff_name.text(), self.note.text(), self.service_id.text() )
         dialog.exec()
 class makeservice(QDialog):
     def __init__(self, service_name, product_price, payment_method, staff_id, note, service_id ):
@@ -415,7 +464,7 @@ class makeservice(QDialog):
        connection = DatabaseConnection().connect()
        cursor = connection.cursor()
 
-       cursor.execute("INSERT  INTO transactions (SERVICE_ID, NAME,  SELLING_PRICE, PAYMENT_METHOD, STAFF_ID, DATE, NOTE) VALUES (?, ?, ?, ?, ?, ?, ?)", (self.service_id, self.service_name,self.service_price, self.payment_method, self.staff_id, date, self.note, ))
+       cursor.execute("INSERT  INTO transactions (SERVICE_ID, NAME,  SELLING_PRICE, PAYMENT_METHOD, STAFF_NAME, DATE, NOTE) VALUES (?, ?, ?, ?, ?, ?, ?)", (self.service_id, self.service_name,self.service_price, self.payment_method, self.staff_id, date, self.note, ))
 
        connection.commit()
        cursor.close()

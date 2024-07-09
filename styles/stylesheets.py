@@ -118,3 +118,32 @@ def apply_animationOndelete(self):
     self.animation.setEndValue(1.0)
     self.animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
     self.animation.start()
+
+def loginstyleQ(self):
+    self.setStyleSheetlog("""
+                QWidget {
+                    background-color: white;
+                    border: 2px solid blue;
+                    border-radius: 10px;
+                }
+                QLabel, QLineEdit {
+                    background-color: white;
+                    color: black;
+                    border: 1px solid gray;
+                    border-radius: 5px;
+                    padding: 5px;
+                }
+                QPushButton {
+                    background-color: green;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 7px;
+                }
+                QPushButton:hover {
+                    background-color: lightgreen;
+                }
+                QLabel#status {
+                    color: red;
+                }
+            """)
