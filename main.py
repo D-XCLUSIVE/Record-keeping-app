@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
     """)
 
         delete_button = QPushButton("Delete Record")
-        delete_button.clicked.connect(self.edit)
+        delete_button.clicked.connect(self.delete_pro)
         delete_button.setStyleSheet("""
         QPushButton {
             background-color: #f44336;
@@ -280,8 +280,6 @@ class MainWindow(QMainWindow):
             color: white;
         }
     """)
-        delete_button.clicked.connect(self.delete_pro)
-
 
         children = self.findChildren(QPushButton)
         if children:
@@ -739,11 +737,6 @@ class EditDialog(QDialog):
         connection.close()
         main_window.load_data()
 
-
-
-
-
-
 class EditService(QDialog):
     def __init__(self):
         super().__init__()
@@ -810,11 +803,11 @@ class EditStaff(QDialog):
         layout.addWidget(self.staff_Role)
 
         self.staff_Contactinfo = QLineEdit( staff_Contactinfo)
-        self.staff_Contactinfo.setPlaceholderText("staff Name")
+        self.staff_Contactinfo.setPlaceholderText("Phone")
         layout.addWidget(self.staff_Contactinfo)
 
         self.staff_Password  = QLineEdit( staff_Password )
-        self.staff_Password .setPlaceholderText("staff Name")
+        self.staff_Password .setPlaceholderText("staff password")
         layout.addWidget(self.staff_Password )
 
         button = QPushButton("Update")

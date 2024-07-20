@@ -18,10 +18,10 @@ class table_function:
         main_window.pro_search_bar.setVisible(True)
         main_window.service_search_bar.setVisible(False)
         main_window.table = QTableWidget()
-        main_window.table.verticalHeader().setVisible(False)
+        main_window.table.verticalHeader().setVisible(True)
         main_window.table.horizontalHeader().setMinimumHeight(70)
         main_window.table.setColumnCount(7)
-        main_window.table.setColumnWidth(0, 190)
+        main_window.table.setColumnHidden(0, True)
         main_window.table.setColumnWidth(1, 190)
         main_window.table.setColumnWidth(2, 190)
         main_window.table.setColumnWidth(3, 190)
@@ -121,9 +121,10 @@ class table_function:
         self.service_search_bar.setVisible(True)
         self.pro_search_bar.setVisible(False)
         self.service_table = QTableWidget()
-        self.service_table.verticalHeader().setVisible(False)
+        self.service_table.verticalHeader().setVisible(True)
         self.service_table.horizontalHeader().setMinimumHeight(70)
         self.service_table.setColumnCount(3)
+        self.service_table.setColumnHidden(0, True)
         self.service_table.setStyleSheet("""
             QTableWidget {
                 background-color: #fff;
@@ -251,6 +252,7 @@ class table_function:
         self.staff_table.horizontalHeader().setMinimumHeight(70)
 
         self.staff_table.setColumnCount(5)
+        self.staff_table.setColumnHidden(0, True)
         self.staff_table.verticalHeader().setVisible(True)
         self.staff_table.setStyleSheet("""
             QTableWidget {
