@@ -777,7 +777,7 @@ class EditService(QDialog):
         connection.close()
         main_window.load_service_data()
         self.close()
-
+ 
 class EditStaff(QDialog):
     def __init__(self):
         super().__init__()
